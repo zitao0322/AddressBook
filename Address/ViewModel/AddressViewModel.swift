@@ -2,21 +2,40 @@ import Foundation
 import ReactiveSwift
 import Result
 
+private let dataSource: [Address] = [
+    Address(name: "第一名", number: "123456789"),
+    Address(name: "第二名", number: "123456789"),
+    Address(name: "第三名", number: "123456789"),
+    Address(name: "第四名", number: "123456789"),
+    Address(name: "第五名", number: "123456789"),
+    Address(name: "第六名", number: "123456789")
+]
+
 public protocol AddressViewModelType {
-    var name: String { get }
-    var number: String { get }
-    var showDetail: Action<(), String, NoError> { get }
+    typealias Item = AddressItemViewModelType
+    
+    var items: Property<[Item]> { get }
+    var refresh: Action<(), [Address], NoError> { get }
+    var showDetail: Signal<String, NoError> { get }
 }
 
 public struct AddressViewModel: AddressViewModelType {
-    public let name: String
-    public let number: String
-    public let showDetail: Action<(), String, NoError>
+    public let items: Property<[Item]>
+    public let refresh: Action<(), [Address], NoError>
+    public let showDetail: Signal<String, NoError>
     
-    public init(model: Address) {
-        self.name = model.name
-        self.number = model.number
+    public init() {
+        let _items = MutableProperty<[Item]>([])
+        self.items = Property(capturing: _items)
         
-        self.showDetail = Action { .init(value: model.name) }
+        func transfromToShowDetail(list: [Item]) -> Signal<String, NoError> {
+            let signals = list.map { $0.showDetail.values }
+            return Signal.merge(signals)
+        }
+        self.showDetail = items.signal.map(transfromToShowDetail).flatten(.latest)
+        
+        self.refresh = Action { .init(value: dataSource) }
+        
+        _items <~ refresh.values.map { $0.map(AddressItemViewModel.init(model: )) }
     }
 }

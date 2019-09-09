@@ -2,9 +2,8 @@ import UIKit
 import ReactiveCocoa
 import ReactiveSwift
 
-public class ViewController: UIViewController {
-    
-    public var viewModel: ViewControllerViewModelType = ViewControllerViewModel()
+public class AddressViewController: UIViewController {
+    public var viewModel: AddressViewModelType = AddressViewModel()
     
     @IBOutlet weak var tableView: UITableView!
     
@@ -14,13 +13,13 @@ public class ViewController: UIViewController {
         tableView.reactive.reloadData <~ viewModel.items.signal.map { _ in }
         
         viewModel.showDetail.observeValues { [unowned self] in
-            self.showDetail($0)
+            self.showAddressDetail($0)
         }
         
         viewModel.refresh.apply().start()
     }
     
-    private func showDetail(_ name: String) {
+    private func showAddressDetail(_ name: String) {
         let controller = UIViewController()
         controller.view.backgroundColor = UIColor.white
         controller.navigationItem.title = name
@@ -28,7 +27,7 @@ public class ViewController: UIViewController {
     }
 }
 
-extension ViewController: UITableViewDelegate, UITableViewDataSource {
+extension AddressViewController: UITableViewDelegate, UITableViewDataSource {
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.items.value.count
     }
