@@ -3,7 +3,12 @@ import ReactiveCocoa
 import ReactiveSwift
 
 public class AddressViewController: UIViewController {
+    
+    // MARK: Public Properties
+    
     public var viewModel: AddressViewModelType = AddressViewModel()
+    
+    // MARK: Private Properties
     
     @IBOutlet weak var tableView: UITableView!
     
@@ -19,11 +24,10 @@ public class AddressViewController: UIViewController {
         viewModel.refresh.apply().start()
     }
     
-    private func showAddressDetail(_ name: String) {
-        let controller = UIViewController()
-        controller.view.backgroundColor = UIColor.white
-        controller.navigationItem.title = name
-        show(controller, sender: nil)
+    private func showAddressDetail(_ viewModel: EditingNumberViewModelType) {
+        let vc = EditingNumberViewController.instantiate()
+        vc.viewModel = viewModel
+        navigationController?.show(vc, sender: nil)
     }
 }
 

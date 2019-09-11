@@ -3,21 +3,29 @@ import ReactiveSwift
 import Result
 
 public protocol AddressItemViewModelType {
+    typealias Detail = EditingNumberViewModelType
+    
     var name: String { get }
-    var number: String { get }
-    var showDetail: Action<(), String, NoError> { get }
+    var number: Property<String> { get }
+    var showDetail: Action<(), Detail, NoError> { get }
 }
 
 public struct AddressItemViewModel: AddressItemViewModelType {
     public let name: String
-    public let number: String
-    public let showDetail: Action<(), String, NoError>
+    public let number: Property<String>
+    public let showDetail: Action<(), Detail, NoError>
     
     public init(model: Address) {
         self.name = model.name
         
-        self.number = model.number
+        let _number = MutableProperty<String>(model.number)
+        self.number = Property<String>(capturing: _number)
 
-        self.showDetail = Action { .init(value: model.name) }
+        self.showDetail = Action(state: _number) {
+            let address = Address(name: model.name, number: $0)
+            return .init(value: EditingNumberViewModel(model: address))
+        }
+        
+        _number <~ showDetail.values.map { $0.confirm.values }.flatten(.latest)
     }
 }

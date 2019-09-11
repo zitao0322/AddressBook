@@ -13,22 +13,23 @@ private let dataSource: [Address] = [
 
 public protocol AddressViewModelType {
     typealias Item = AddressItemViewModelType
-    
+    typealias Detail = Item.Detail
+
     var items: Property<[Item]> { get }
     var refresh: Action<(), [Address], NoError> { get }
-    var showDetail: Signal<String, NoError> { get }
+    var showDetail: Signal<Detail, NoError> { get }
 }
 
 public struct AddressViewModel: AddressViewModelType {
     public let items: Property<[Item]>
     public let refresh: Action<(), [Address], NoError>
-    public let showDetail: Signal<String, NoError>
+    public let showDetail: Signal<Detail, NoError>
     
     public init() {
         let _items = MutableProperty<[Item]>([])
         self.items = Property(capturing: _items)
         
-        func transfromToShowDetail(list: [Item]) -> Signal<String, NoError> {
+        func transfromToShowDetail(list: [Item]) -> Signal<Detail, NoError> {
             let signals = list.map { $0.showDetail.values }
             return Signal.merge(signals)
         }
